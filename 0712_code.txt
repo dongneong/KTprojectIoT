@@ -4,7 +4,7 @@ import argparse
 
 from matplotlib.patches import YAArrow
 
-cap = cv2.VideoCapture("./videos/9.mp4")
+cap = cv2.VideoCapture("videos/9.mp4")
 
 width = int(cap.get(3) / 3)
 height = int(cap.get(4) / 3)
@@ -51,7 +51,7 @@ while (cap.isOpened()):
     _, frame = cap.read()
     if frame is None:
         break
-
+        
     W = cap.get(3)
     H = cap.get(4)
 
@@ -92,13 +92,15 @@ while (cap.isOpened()):
         cv2.imshow("crop_frame", crop_frame)
         crop_hsv_frame = cv2.cvtColor(crop_frame, cv2.COLOR_BGR2HSV)
         crop_frame_threshed = cv2.inRange(crop_hsv_frame, COLOR_MIN_GREEN, COLOR_MAX_GREEN)
+
         crop_ret, crop_thresh = cv2.threshold(crop_frame_threshed, 127, 255, 0)
         crop_contours, crop_hierarchy = cv2.findContours(crop_thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         for cnt in crop_contours:
             x1, y1, w1, h1 = cv2.boundingRect(cnt)
-            if w1 > 3 and h1 > 3:
+            if w1 > 1 and h1 > 1:
                 print("GREEN")
                 cv2.rectangle(crop_frame, (x1, y1), (x1 + w1, y1 + h1), (0, 255, 0), 2)
+                cv2.imshow("crop_frame", crop_frame)
                 flag=0
                 break
     if flag==0:
