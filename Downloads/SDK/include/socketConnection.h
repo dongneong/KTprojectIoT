@@ -10,11 +10,11 @@
 #include <arpa/inet.h>
 
 #define BUF_SIZE 128
-#define IP "192.168.43.254"
-#define PORT 4444
+#define IP "localhost"
+#define PORT 5000
 
 struct sockaddr_in server_addr, client_addr;
-int server_fd, client_fd, len, msg_size;
+int server_fd, client_fd, len, msg_size, option, optlen;
 char temp[20], test[20], buffer[BUF_SIZE];
 
 void open_server()
@@ -24,6 +24,10 @@ void open_server()
         printf("server : can not open socket!\n");
         exit(0);
     }
+
+    optlen = sizeof(option);
+    option = TRUE;
+    setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option));
 
     memset(&server_addr, 0x00, sizeof(server_addr));
 
@@ -45,11 +49,11 @@ void open_server()
     memset(buffer, 0x00, sizeof(buffer));
     len = sizeof(client_addr);
     printf("====[PORT]==== : %d ====\n", PORT);
-    printf("server is waiting client connection request...\n");
 }
 
-char* connectionAndClose()
+char* connectionAndGetData()
 {
+    printf("server is waiting client connection reqeust...\n");	
     client_fd = accept(server_fd, (struct sockaddr *)&client_addr, (socklen_t *)&len);
     if(client_fd < 0){
         printf("server : accept failed!\n");
@@ -64,9 +68,15 @@ char* connectionAndClose()
     printf("get message : %s\n", buffer);
     printf("message size : %d\n", sizeof(buffer));
 
-    close(server_fd);
+    close(client_fd);
 
     printf("server : %s client closed.\n", temp);
 
     return buffer;
+}
+
+void close_server()
+{
+    close(server_fd);
+    printf("====== server socket is closed. ======\n");
 }

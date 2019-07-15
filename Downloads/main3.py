@@ -3,12 +3,13 @@ import numpy as np
 from socket import *
 from select import *
 import sys
-from time import ctime
+#from time import ctime
+import time
 
 
 def sendMessageWithSocket(str):
-    HOST = '192.168.43.254'
-    PORT = 4444
+    HOST = 'localhost'
+    PORT = 5000
     BUFSIZE = 1024
     ADDR = (HOST, PORT)
 

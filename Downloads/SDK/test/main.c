@@ -6,6 +6,7 @@
 #include "iotmakers.h"
 #include "socketConnection.h"
 
+#define SPEAKER 3 // BCM GPIO 22
 #define LED1 5 // BCM_GPIO 24
 #define TC1 4  // BCM_GPIO 23
 #define MAXTIMINGS 85
@@ -39,12 +40,24 @@ static void set_SigHandler()
 static void mycb_numdata_handler(char *tagid, double numval)
 {
 	// !!! USER CODE HERE
+	printf("11111111111 : %s\n", tagid);
+	pinMode(SPEAKER, OUTPUT);
+	if(!strcmp(tagid, "Sound"))
+	{
+		if((int)numval == 1)
+		{
+			digitalWrite(SPEAKER, 1); // ON
+			delay(1500);
+			digitalWrite(SPEAKER, 0); // OFF
+		}
+	}
 	printf("tagid=[%s], val=[%f]\n", tagid, numval);
 }
 
 static void mycb_strdata_handler(char *tagid, char *strval)
 {
 	// LED on-off ...
+	printf("222222222222222 : %s\n", tagid);
 	pinMode(LED1, OUTPUT);
 	if(!strcmp(tagid,"LED"))
 	{
@@ -52,18 +65,15 @@ static void mycb_strdata_handler(char *tagid, char *strval)
 		{
 			printf("tagid=[%s], val=[%s]\n", tagid, strval);
 			digitalWrite(LED1, 1); // On
-		}
-		else if(!strcmp(strval,"OFF"))
-		{
-			printf("tagid=[%s], val=[%s]\n", tagid, strval);
-		    digitalWrite(LED1, 0); // Off
+			delay(1000);
+			digitalWrite(LED1, 0); //OFF
 		}
 	}
 }
 
 int main()
 {
-	int i;
+	int i, count = 0;
 	int rc;
 	char *data;
 
@@ -88,12 +98,19 @@ int main()
 	}
 
 	open_server();
-	data = connectionAndClose();
-	printf("get data : %s\n", data);
-	
-	if(strcmp(data, "GREEN") == 0){
-		im_send_numdata("Color", 1, 0);
+	while(count < 3)
+	{
+		if(wiringPiSetup() == -1)
+			exit(1);
+		data = connectionAndGetData();
+		printf("get data : %s\n", data);
+		if(!strcmp(data, "GREEN"))
+		{
+			im_send_numdata("Color", 1, 0);
+			count++;
+		}
 	}
+	close_server();
 
     // Raspberry pi wiringPiSetup...
 	printf("dht11 Raspberry pi\n");
